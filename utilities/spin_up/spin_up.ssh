@@ -1,0 +1,2 @@
+
+uvicorn --app-dir /home/ubuntu/whosup/API\ FastAPI/ app:app --reload --host 0.0.0.0 --port 8000
