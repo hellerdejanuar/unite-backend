@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+
+COLOR='\033[0;35m'
+RED='\033[0;31m'
+NOCOLOR='\033[0m'
+
+# Programs
+sudo apt-get update -y
+
+echo -e "${COLOR}Instalando: python${NOCOLOR}"
+sudo apt-get install -y python
+
+echo -e "${COLOR}Instalando: pip${NOCOLOR}"
+sudo apt-get install -y python3-pip
+
+
+echo -e "${COLOR}Instalando: mariadb (Community Server)${NOCOLOR}"
+
+sudo apt-get install -y wget
+
+# Install MariaDB server
+sudo apt update
+sudo apt install mariadb-server
+
+# sudo mysql_secure_installation # THIS STEP IS REQUIRED FOR PRODUCTION
+# Read this to configure production server:
+# https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-20-04
+
+# Configure MariaDB CS repo
+wget https://r.mariadb.com/downloads/mariadb_repo_setup
+echo "ad125f01bada12a1ba2f9986a21c59d2cccbe8d584e7f55079ecbeb7f43a4da4  mariadb_repo_setup" \
+    | sha256sum -c -
+chmod +x mariadb_repo_setup
+sudo ./mariadb_repo_setup \
+   --mariadb-server-version="mariadb-10.6"
+
+# Install MariaDB Connector/C
+sudo apt install libmariadb3 libmariadb-dev
+
+
+# Python virtual environment
+echo -e "${COLOR}Instalando: venv${NOCOLOR}"
+sudo apt-get install -y python3-venv
+
+echo -e "${COLOR}Creando entorno virtual${NOCOLOR}"
+sudo python3 -m venv ./fastapi-mysql
+sudo chown -R ubuntu:ubuntu ./fastapi-mysql/
+
+echo -e "${COLOR}Activando entorno virtual${NOCOLOR}"
+source fastapi-mysql/bin/activate
+
+
+# Python libraries to be installed
+# inside the venv
+
+echo -e "${COLOR}Instalando: wheel${NOCOLOR}"
+pip install wheel
+
+echo -e "${COLOR}Instalando: uvicorn${NOCOLOR}"
+pip install uvicorn==0.18.3
+
+echo -e "${COLOR}Instalando: fastapi${NOCOLOR}"
+pip install fastapi[all]
+
+echo -e "${COLOR}Instalando: sqlalchemy${NOCOLOR}"
+pip install sqlalchemy
+
+echo -e "${COLOR}Instalando: pymysql${NOCOLOR}"
+pip install pymysql==1.0.2
+
+#echo -e "${COLOR}Instalando: httptools${NOCOLOR}"
+#pip install httptools==0.1.2 
+
+echo -e "${COLOR}Instalando: cryptography${NOCOLOR}"
+pip install cryptography
+
+
+
+echo -e "${RED}Now Proceed to copy the proxy config in utilites/env_setup/config_files/nginx_proxy_config\n to /etc/nginx/sites-enabled/fastaspi_proxy${NOCOLOR}"
