@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Response, status
-from config.db import engine
+from config.db import engine, Session
 from typing import List
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -88,11 +88,13 @@ def create_event(this_event: EventSchema):
                  "max_people": this_event.max_people, 
                  "config": this_event.config}
     # Realiza la conexion con la base de datos para insertar el nuevo usuario
-    result = conn.execute(insert(Event).values(new_event))
-    conn.commit()
-    print("NEW EVENT . id: ", result.lastrowid)
-    # Busca en la base de datos el ultimo evento creado y lo retorna para confirmar que se cre
-    return conn.execute(select(Event).where(Event.id == result.lastrowid)).first()
+
+    with Session() as session:
+        result = session.execute(insert(Event).values(new_event))
+        session.commit()
+        new_event["id"] = result.lastrowid
+        return new_event
+    # Busca en la base de datos el ultimo evento creado y lo retorna (no confirma que se haya creado, solo devuelve un obj)
 
 
 @eventAPI.put('/event/{id}', response_model=EventSchema, tags=["Events"], response_model_exclude_unset=True)
